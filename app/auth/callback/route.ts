@@ -28,12 +28,20 @@ export async function GET(request: Request) {
         }
 
         // Role-based routing
+        if (profile?.role === "admin") {
+          return NextResponse.redirect(`${requestUrl.origin}/admin`);
+        }
+
+        if (profile?.role === "buyer") {
+          return NextResponse.redirect(`${requestUrl.origin}/buyer`);
+        }
+
         if (profile?.role === "creator") {
           const dest = profile.onboarding_complete ? "/dashboard" : "/onboarding";
           return NextResponse.redirect(`${requestUrl.origin}${dest}`);
         }
 
-        return NextResponse.redirect(`${requestUrl.origin}/account`);
+        return NextResponse.redirect(`${requestUrl.origin}/auth/login`);
       }
     }
   }

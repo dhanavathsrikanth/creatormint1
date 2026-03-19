@@ -69,8 +69,56 @@ function EditorToolbar({ editor, onImageUpload }: { editor: Editor; onImageUploa
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);
 
+  const applyIsolatedBlockFormat = useCallback((action: () => void) => {
+    const { state, view } = editor;
+    const { selection, tr } = state;
+
+    if (selection.empty) {
+      action();
+      return;
+    }
+
+    const { $from, $to } = selection;
+    
+    // Only isolate if the selection is perfectly within a single block
+    if ($from.parent !== $to.parent) {
+      action();
+      return;
+    }
+
+    const isAtStart = $from.parentOffset === 0;
+    const isAtEnd = $to.parentOffset === $from.parent.content.size;
+
+    // If perfectly isolated already, do standard behavior
+    if (isAtStart && isAtEnd) {
+      action();
+      return;
+    }
+
+    let transaction = tr;
+    let startPos = $from.pos;
+    let endPos = $to.pos;
+
+    // Split at the end first so our $from.pos doesn't shift
+    if (!isAtEnd) {
+      transaction = transaction.split($to.pos);
+    }
+    // Split at the start (shifts everything after it by 2 tokens)
+    if (!isAtStart) {
+      transaction = transaction.split($from.pos);
+      startPos += 2;
+      endPos += 2;
+    }
+
+    view.dispatch(transaction);
+    editor.commands.setTextSelection({ from: startPos, to: endPos });
+    
+    // Run the native tiptap command now that the selection is its own separate block
+    action();
+  }, [editor]);
+
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-border bg-muted/30">
+    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-border bg-muted/95 backdrop-blur">
       {/* History */}
       <ToolbarButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo">
         <Undo className="w-4 h-4" />
@@ -81,13 +129,13 @@ function EditorToolbar({ editor, onImageUpload }: { editor: Editor; onImageUploa
       <Divider />
 
       {/* Headings */}
-      <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleHeading({ level: 1 }).run())} active={editor.isActive("heading", { level: 1 })} title="Heading 1">
         <Heading1 className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleHeading({ level: 2 }).run())} active={editor.isActive("heading", { level: 2 })} title="Heading 2">
         <Heading2 className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Heading 3">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleHeading({ level: 3 }).run())} active={editor.isActive("heading", { level: 3 })} title="Heading 3">
         <Heading3 className="w-4 h-4" />
       </ToolbarButton>
       <Divider />
@@ -114,13 +162,13 @@ function EditorToolbar({ editor, onImageUpload }: { editor: Editor; onImageUploa
       <Divider />
 
       {/* Lists & blocks */}
-      <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet list">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleBulletList().run())} active={editor.isActive("bulletList")} title="Bullet list">
         <List className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Numbered list">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleOrderedList().run())} active={editor.isActive("orderedList")} title="Numbered list">
         <ListOrdered className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} title="Blockquote">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().toggleBlockquote().run())} active={editor.isActive("blockquote")} title="Blockquote">
         <Quote className="w-4 h-4" />
       </ToolbarButton>
       <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Horizontal rule">
@@ -129,13 +177,13 @@ function EditorToolbar({ editor, onImageUpload }: { editor: Editor; onImageUploa
       <Divider />
 
       {/* Text alignment */}
-      <ToolbarButton onClick={() => editor.chain().focus().setTextAlign("left").run()} active={editor.isActive({ textAlign: "left" })} title="Align left">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().setTextAlign("left").run())} active={editor.isActive({ textAlign: "left" })} title="Align left">
         <AlignLeft className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().setTextAlign("center").run()} active={editor.isActive({ textAlign: "center" })} title="Align center">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().setTextAlign("center").run())} active={editor.isActive({ textAlign: "center" })} title="Align center">
         <AlignCenter className="w-4 h-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={() => editor.chain().focus().setTextAlign("right").run()} active={editor.isActive({ textAlign: "right" })} title="Align right">
+      <ToolbarButton onClick={() => applyIsolatedBlockFormat(() => editor.chain().focus().setTextAlign("right").run())} active={editor.isActive({ textAlign: "right" })} title="Align right">
         <AlignRight className="w-4 h-4" />
       </ToolbarButton>
       <Divider />
@@ -204,6 +252,7 @@ export function RichTextEditor({
 
   // ── Tiptap editor setup ───────────────────────────────────────
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Image.configure({
@@ -278,9 +327,9 @@ export function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className={`rounded-xl border border-border overflow-hidden bg-background ${disabled ? "opacity-60" : ""}`}>
+    <div className={`relative flex flex-col rounded-xl border border-border overflow-hidden bg-background max-h-[600px] ${disabled ? "opacity-60" : ""}`}>
       <EditorToolbar editor={editor} onImageUpload={() => fileInputRef.current?.click()} />
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
       <input
         ref={fileInputRef}
         type="file"

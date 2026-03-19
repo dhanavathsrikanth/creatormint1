@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { Separator } from "@/components/ui/separator";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -18,6 +19,7 @@ import {
   LifeBuoy,
   TrendingUp,
   Activity,
+  Rocket,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +28,7 @@ const navItems = [
   { href: "/dashboard/sales",    label: "Sales",     icon: TrendingUp },
   { href: "/dashboard/support",  label: "Support",   icon: LifeBuoy },
   { href: "/dashboard/settings", label: "Settings",  icon: Settings },
+  { href: "/roadmap",            label: "Roadmap",   icon: Rocket },
 ];
 
 interface DashboardShellProps {
@@ -141,6 +144,10 @@ export function DashboardShell({ profile, children }: DashboardShellProps) {
       {/* Main */}
       <main className="flex-1 min-w-0 md:overflow-auto">
         <div className="md:hidden h-14" />
+        {/* Breadcrumb bar */}
+        <div className="sticky top-0 z-10 h-11 border-b border-border bg-background/80 backdrop-blur-sm flex items-center px-5">
+          <Breadcrumbs homeHref="/dashboard" />
+        </div>
         {children}
       </main>
     </div>

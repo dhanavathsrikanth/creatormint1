@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
         await supabase.from("orders").update({
           payment_status: "paid",
           cashfree_payment_id: cfData.payments?.[0]?.cf_payment_id ?? null,
-          download_token_expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72h
+          download_token_expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
         }).eq("id", orderId);
 
         await supabase.rpc("record_sale", {

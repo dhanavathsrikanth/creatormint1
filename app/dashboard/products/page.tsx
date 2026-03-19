@@ -46,14 +46,14 @@ export default async function ProductsPage() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
+        <div className="px-3 py-3 border-b border-border bg-muted/40">
+          <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             <span className="w-12 shrink-0">Cover</span>
             <span className="flex-1">Product</span>
-            <span className="w-20 text-right">Price</span>
-            <span className="w-16 text-center">Sales</span>
-            <span className="w-20 text-center">Status</span>
-            <span className="w-20 text-right">Actions</span>
+            <span className="w-20 text-right shrink-0">Price</span>
+            <span className="w-16 text-center shrink-0">Sales</span>
+            <span className="w-20 text-center shrink-0">Status</span>
+            <span className="w-36 text-right shrink-0">Actions</span>
           </div>
         </div>
         <div className="p-3">

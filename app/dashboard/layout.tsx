@@ -15,7 +15,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .single<Profile>();
 
   if (!profile) redirect("/auth/login");
-  if (profile.role !== "creator") redirect("/account");
+  if (profile.role === "buyer") redirect("/buyer");
+  if (profile.role === "admin") redirect("/admin");
+  if (profile.role !== "creator") redirect("/auth/login");
   if (!profile.onboarding_complete) redirect("/onboarding");
 
   return <DashboardShell profile={profile}>{children}</DashboardShell>;

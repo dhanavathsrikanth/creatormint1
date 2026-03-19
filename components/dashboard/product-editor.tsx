@@ -37,6 +37,8 @@ export function ProductEditor({ userId, storeSlug, product }: ProductEditorProps
   const [slug, setSlug] = useState(product.slug);
   const [summary, setSummary] = useState(product.summary ?? "");
   const [description, setDescription] = useState(product.description ?? "");
+  const [ctaText, setCtaText] = useState(product.cta_text ?? "");
+  const [maxReviews, setMaxReviews] = useState<string>(String(product.max_reviews_displayed ?? 10));
   const [priceRupees, setPriceRupees] = useState(
     product.price_paise > 0 ? String(product.price_paise / 100) : ""
   );
@@ -90,12 +92,33 @@ export function ProductEditor({ userId, storeSlug, product }: ProductEditorProps
     return () => clearTimeout(timer);
   }, [slug, product.slug, product.id]);
 
+  // ── Build PATCH payload ───────────────────────────────────────
+  const buildPayload = useCallback((publishOverride?: boolean) => {
+    const pricePaise = isFree ? 0 : rupeesToPaise(Number(priceRupees) || 0);
+    return {
+      title: title.trim(),
+      slug: slug.trim(),
+      summary: summary.trim() || null,
+      description: description || null,
+      cta_text: ctaText.trim() || null,
+      max_reviews_displayed: parseInt(maxReviews) || 10,
+      price_paise: pricePaise,
+      is_published: publishOverride !== undefined ? publishOverride : isPublished,
+    };
+  }, [title, slug, summary, description, ctaText, maxReviews, priceRupees, isFree, isPublished]);
+
+  // Use a ref to hold the latest payload, avoiding stale closures in setTimeout
+  const payloadRef = useRef(buildPayload(false));
+  useEffect(() => {
+    payloadRef.current = buildPayload(false);
+  }, [buildPayload]);
+
   // ── Auto-save: fire 30s after last change ─────────────────────
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(async () => {
       try {
-        const payload = buildPayload(false); // use current state via closure
+        const payload = payloadRef.current; // get fresh payload from ref
         await fetch(`/api/products/${product.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -104,30 +127,17 @@ export function ProductEditor({ userId, storeSlug, product }: ProductEditorProps
         flashSaved();
       } catch { /* silent */ }
     }, 30_000);
-  }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [product.id]); // stable identity
 
   useEffect(() => {
     scheduleAutoSave();
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
-  }, [title, slug, summary, description, priceRupees, isFree, scheduleAutoSave]);
+  }, [title, slug, summary, description, ctaText, maxReviews, priceRupees, isFree, scheduleAutoSave]);
 
   const flashSaved = () => {
     setShowSaved(true);
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
     savedTimerRef.current = setTimeout(() => setShowSaved(false), 3000);
-  };
-
-  // ── Build PATCH payload ───────────────────────────────────────
-  const buildPayload = (publishOverride?: boolean) => {
-    const pricePaise = isFree ? 0 : rupeesToPaise(Number(priceRupees) || 0);
-    return {
-      title: title.trim(),
-      slug: slug.trim(),
-      summary: summary.trim() || null,
-      description: description || null,
-      price_paise: pricePaise,
-      is_published: publishOverride !== undefined ? publishOverride : isPublished,
-    };
   };
 
   // ── Cover image dropzone ──────────────────────────────────────
@@ -517,11 +527,41 @@ export function ProductEditor({ userId, storeSlug, product }: ProductEditorProps
                 </div>
               </div>
 
-              {/* ── Pricing card ── */}
+              {/* ── Pricing & CTA card ── */}
               <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pricing</Label>
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pricing & Call to Action</Label>
 
-                <div className="flex items-center gap-2">
+                <div className="space-y-1.5 pb-2 border-b border-border">
+                  <span className="text-xs text-muted-foreground">Button Text (Optional)</span>
+                  <Input 
+                    placeholder="e.g. Buy Now, Get Access" 
+                    value={ctaText} 
+                    onChange={(e) => setCtaText(e.target.value)}
+                    className="h-8 text-sm placeholder:text-muted-foreground/50"
+                    disabled={isBusy}
+                  />
+                </div>
+
+                <div className="space-y-1.5 pb-2 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Reviews to Display</span>
+                    <span className="text-xs font-semibold text-foreground">{parseInt(maxReviews) || 10}</span>
+                  </div>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="50"
+                    step="1"
+                    className="h-8 text-sm"
+                    placeholder="10"
+                    value={maxReviews}
+                    onChange={(e) => setMaxReviews(e.target.value)}
+                    disabled={isBusy}
+                  />
+                  <p className="text-[11px] text-muted-foreground">Number of reviews shown on your product page (1–50)</p>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setIsFree(!isFree)}

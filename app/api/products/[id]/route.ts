@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
   // Whitelist updatable fields — never allow creator_id or id to change
   const ALLOWED: (keyof Product)[] = [
-    "title", "slug", "summary", "description", "price_paise",
+    "title", "slug", "summary", "description", "cta_text", "max_reviews_displayed", "price_paise",
     "cover_image_url", "file_key", "file_name", "file_size_bytes", "is_published",
   ];
 

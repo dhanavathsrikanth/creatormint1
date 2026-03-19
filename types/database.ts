@@ -1,6 +1,44 @@
-export type Role = 'creator' | 'buyer';
+export type Role = 'creator' | 'buyer' | 'admin';
 export type KycStatus = 'pending' | 'submitted' | 'verified' | 'rejected';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+export type FeatureStatus = 'under_review' | 'planned' | 'in_progress' | 'done' | 'declined';
+export type FeatureCategory = 'feature' | 'improvement' | 'bug' | 'integration' | 'general';
+
+export interface FeatureRequest {
+  id: string;
+  title: string;
+  description: string | null;
+  author_id: string | null;
+  author_name: string;
+  author_role: string;
+  status: FeatureStatus;
+  category: FeatureCategory;
+  vote_count: number;
+  downvote_count: number;
+  admin_response: string | null;
+  admin_response_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeatureRequestVote {
+  request_id: string;
+  user_id: string;
+  vote_type: 'up' | 'down';
+  created_at: string;
+}
+
+export interface FeatureRequestComment {
+  id: string;
+  request_id: string;
+  author_id: string | null;
+  author_name: string;
+  author_role: string;
+  content: string;
+  is_admin_response: boolean;
+  created_at: string;
+}
+
 
 export interface Profile {
   id: string;
@@ -31,6 +69,8 @@ export interface Product {
   slug: string;
   summary: string | null;
   description: string | null;
+  cta_text: string | null;
+  max_reviews_displayed: number; // how many reviews to show on product page
   price_paise: number; // always integer paise
   cover_image_url: string | null;
   file_key: string | null;
@@ -68,6 +108,17 @@ export interface Order {
 export type TicketCategory = 'payment' | 'technical' | 'account' | 'billing' | 'other';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TicketStatus = 'open' | 'in_progress' | 'waiting_creator' | 'resolved' | 'closed';
+
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  buyer_name: string;
+  rating: number; // 1-5
+  review_text: string | null;
+  review_video_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface SupportTicket {
   id: string;

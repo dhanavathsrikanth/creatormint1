@@ -8,25 +8,30 @@ interface StoreHeroProps {
 
 export function StoreHero({ profile, productCount }: StoreHeroProps) {
   const displayName = profile.store_name ?? profile.full_name ?? "Creator";
-  const accentColor = profile.store_accent_color ?? "#3ECF8E";
+  const accentColor = profile.store_accent_color ?? "#000000";
 
   return (
-    <header
-      className="bg-white border-b border-gray-100"
-      style={{ borderTop: `4px solid ${accentColor}` }}
-    >
-      <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col items-center text-center">
+    <div className="relative overflow-hidden bg-white border-b border-gray-100">
+      {/* Decorative premium gradient header */}
+      <div 
+        className="absolute inset-x-0 top-0 h-40 opacity-20 pointer-events-none"
+        style={{
+          background: `linear-gradient(to bottom, ${accentColor}, transparent)`
+        }}
+      />
+      
+      <div className="relative max-w-5xl mx-auto px-6 pt-20 pb-16 flex flex-col items-center text-center z-10">
         {/* Avatar */}
         {profile.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={profile.avatar_url}
             alt={displayName}
-            className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md mb-5"
+            className="w-24 h-24 rounded-full object-cover shadow-xl ring-4 ring-white mb-6 hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white border-4 border-white shadow-md mb-5"
+            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-xl ring-4 ring-white mb-6 hover:scale-105 transition-transform duration-300"
             style={{ backgroundColor: accentColor }}
           >
             {displayName.charAt(0).toUpperCase()}
@@ -35,7 +40,7 @@ export function StoreHero({ profile, productCount }: StoreHeroProps) {
 
         {/* Store name */}
         <h1
-          className="text-4xl font-black text-gray-900 tracking-tight leading-tight"
+          className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight"
           style={{ fontFamily: "var(--font-fraunces, Georgia, serif)" }}
         >
           {displayName}
@@ -43,31 +48,25 @@ export function StoreHero({ profile, productCount }: StoreHeroProps) {
 
         {/* Description */}
         {profile.store_description && (
-          <p className="mt-3 text-gray-500 max-w-lg text-balance leading-relaxed">
+          <p className="mt-4 text-gray-500 text-lg max-w-xl text-balance leading-relaxed">
             {profile.store_description}
           </p>
         )}
 
         {/* Stats */}
-        <div className="flex items-center gap-6 mt-5 text-sm text-gray-400">
-          <div className="flex items-center gap-1.5">
-            <Package className="w-4 h-4" />
-            <span>
-              <strong className="text-gray-700">{productCount}</strong>{" "}
-              product{productCount !== 1 ? "s" : ""}
-            </span>
+        <div className="flex items-center gap-6 mt-8 text-sm text-gray-500 font-medium">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+            <Package className="w-4 h-4" style={{ color: accentColor }} />
+            <span>{productCount} product{productCount !== 1 ? "s" : ""}</span>
           </div>
           {profile.total_sales > 0 && (
-            <div className="flex items-center gap-1">
-              <span>🎉</span>
-              <span>
-                <strong className="text-gray-700">{profile.total_sales.toLocaleString("en-IN")}</strong>{" "}
-                happy buyer{profile.total_sales !== 1 ? "s" : ""}
-              </span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+              <span style={{ color: accentColor }}>★</span>
+              <span>{profile.total_sales.toLocaleString("en-IN")} sales</span>
             </div>
           )}
         </div>
       </div>
-    </header>
+    </div>
   );
 }

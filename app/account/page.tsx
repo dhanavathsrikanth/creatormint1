@@ -23,7 +23,9 @@ export default async function AccountPage() {
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single<Profile>();
   if (!profile) redirect("/auth/login");
 
-  // Redirect creators to dashboard
+  // Redirect to the correct dashboard based on role
+  if (profile.role === "admin") redirect("/admin");
+  if (profile.role === "buyer") redirect("/buyer");
   if (profile.role === "creator" && profile.onboarding_complete) {
     redirect("/dashboard");
   }
