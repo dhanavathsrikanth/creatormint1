@@ -20,15 +20,17 @@ import {
   TrendingUp,
   Activity,
   Rocket,
+  Palette,
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard",          label: "Overview",  icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/products", label: "Products",  icon: Package },
-  { href: "/dashboard/sales",    label: "Sales",     icon: TrendingUp },
-  { href: "/dashboard/support",  label: "Support",   icon: LifeBuoy },
-  { href: "/dashboard/settings", label: "Settings",  icon: Settings },
-  { href: "/roadmap",            label: "Roadmap",   icon: Rocket },
+  { href: "/dashboard",               label: "Overview",      icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/products",      label: "Products",      icon: Package },
+  { href: "/dashboard/store-builder", label: "Store Builder", icon: Palette },
+  { href: "/dashboard/sales",         label: "Sales",         icon: TrendingUp },
+  { href: "/dashboard/support",       label: "Support",       icon: LifeBuoy },
+  { href: "/dashboard/settings",      label: "Settings",      icon: Settings },
+  { href: "/roadmap",                 label: "Roadmap",       icon: Rocket },
 ];
 
 interface DashboardShellProps {
